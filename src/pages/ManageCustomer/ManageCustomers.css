@@ -1,0 +1,19 @@
+
+
+.page-heading {
+  font-size: 22px;
+  font-weight: bold;
+  color: #faeb16;
+  margin-bottom: 20px;
+  position: relative;
+  left: 2px;
+}
+
+.page-heading2{
+   color:#ffd30df1;
+}
+
+.customer-name {
+  font-weight: 500;
+  /* color: #333; */
+}
