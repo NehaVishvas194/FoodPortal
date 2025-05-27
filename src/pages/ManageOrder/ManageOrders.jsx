@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  Table,
-  Button,
-  Select,
-  Tag,
-  Modal,
-  Descriptions,
-  message,
-} from "antd";
+import { Table, Button, Select, Tag, Modal, Descriptions, message } from "antd";
 import { EyeOutlined, PhoneOutlined } from "@ant-design/icons";
 import "./ManageOrders.css";
 import { Input } from "antd";
@@ -466,7 +458,6 @@ const initialOrders = [
   },
 ];
 
-
 const statusColors = {
   Pending: "orange",
   Accepted: "blue",
@@ -487,8 +478,6 @@ const ManageOrders = () => {
     setOrders(updatedOrders);
     message.success(`Order ${record.orderId} updated to ${value}`);
   };
-
-
 
   const showDetails = (record) => {
     setSelectedOrder(record);
@@ -559,11 +548,19 @@ const ManageOrders = () => {
 
   return (
     <div className="orders-container">
-      <div style={{display:"flex", justifyContent:"space-between", marginBottom:"20px"}}>
-    <h2 className="page-heading">Manage <span className="page-heading2">Orders</span> </h2>
-    <Input placeholder="Serch by Order Id..." style={{width:"30%"}}/>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}
+      >
+        <h2 className="page-heading">
+          Manage <span className="page-heading2">Orders</span>{" "}
+        </h2>
+        <Input placeholder="Serch by Order Id..." style={{ width: "30%" }} />
       </div>
-      
+
       <Table
         columns={columns}
         dataSource={orders}

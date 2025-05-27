@@ -1,156 +1,292 @@
-import React from "react";
-import { Table, Tag, Avatar, Button } from "antd";
-import { EyeOutlined, EditOutlined } from "@ant-design/icons";
-import "./ManageRestaurants.css";
-import { Input } from "antd";
-
-const restaurantData = [
-  {
-    key: "1",
-    name: "Spicy Spoon",
-    owner: "Rahul Mehta",
-    email: "spoon@gmail.com",
-    phone: "9876543210",
-    area: "Andheri",
-    status: "Active",
-  },
-  {
-    key: "2",
-    name: "Tandoori Tales",
-    owner: "Faeem Sheikh",
-    email: "tales@gmail.com",
-    phone: "9123456780",
-    area: "Bandra",
-    status: "Inactive",
-  },
-  {
-    key: "3",
-    name: "Green Garden",
-    owner: "Vikram Singh",
-    email: "green@gmail.com",
-    phone: "9900011122",
-    area: "Powai",
-    status: "Active",
-  },
-   {
-    key: "1",
-    name: "Spicy Spoon",
-    owner: "Rahul Mehta",
-    email: "spoon@gmail.com",
-    phone: "9876543210",
-    area: "Andheri",
-    status: "Active",
-  },
-   {
-    key: "1",
-    name: "Spicy Spoon",
-    owner: "Rahul Mehta",
-    email: "spoon@gmail.com",
-    phone: "9876543210",
-    area: "Andheri",
-    status: "Active",
-  },
-   {
-    key: "1",
-    name: "Spicy Spoon",
-    owner: "Rahul Mehta",
-    email: "spoon@gmail.com",
-    phone: "9876543210",
-    area: "Andheri",
-    status: "Active",
-  },
-   {
-    key: "1",
-    name: "Spicy Spoon",
-    owner: "Rahul Mehta",
-    email: "spoon@gmail.com",
-    phone: "9876543210",
-    area: "Andheri",
-    status: "Active",
-  },
-];
+import React, { useEffect } from "react";
+import {
+  Avatar,
+  Box,
+  Chip,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Typography,
+  Button,
+  Modal,
+} from "@mui/material";
+import Swal from "sweetalert2";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchRestaurants,
+  fetchViewRestaurant,
+  deleteRestaurants,
+} from "../../slices/getAll/getAllSlice";
 
 const ManageRestaurants = () => {
-  const columns = [
-    {
-      title: "Avatar",
-      dataIndex: "name",
-      key: "avatar",
-      render: (text) => (
-        <Avatar style={{ backgroundColor: "#ef4444", color: "#fff" }}>
-          {text.charAt(0)}
-        </Avatar>
-      ),
-    },
-    {
-      title: "Restaurant Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <strong className="restaurant-name">{text}</strong>,
-    },
-    {
-      title: "Owner",
-      dataIndex: "owner",
-      key: "owner",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Area",
-      dataIndex: "area",
-      key: "area",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={status === "Active" ? "green" : "volcano"}>{status}</Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <div className="table-actions">
-          <Button
-            icon={<EyeOutlined />}
-            size="small"
-            className="action-btn view-btn"
-          />
-          <Button
-            icon={<EditOutlined />}
-            size="small"
-            className="action-btn edit-btn"
-          />
-        </div>
-      ),
-    },
-  ];
+  const [page, setPage] = React.useState(0);
+  const rowsPerPage = 5;
+  const [search, setSearch] = React.useState("");
+  const [open, setOpen] = React.useState(false);
+  const dispatch = useDispatch();
+  const { restaurants, loading, error } = useSelector((state) => state.getAll);
+  const { restaurantDetails } = useSelector((state) => state.getAll);
+
+  useEffect(() => {
+    dispatch(fetchRestaurants());
+  }, [dispatch]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const filteredData = restaurants.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this restaurant?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteRestaurants(id)).then(() => {
+          Swal.fire("Deleted", "The restaurant has been deleted", "success");
+        });
+      }
+    });
+  };
+
+  const handleView = (id) => {
+    dispatch(fetchViewRestaurant(id));
+    setOpen(true);
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
-    <div className="manage-restaurants-container " >
-      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"20px"}}>
-    <h2 className="page-heading">Manage <span className="page-heading2">Restaurants</span></h2>
-    <input placeholder="Serch by Restaurants..." style={{width:"30%",}} />
+    <>
+      <Box p={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+        >
+          <Typography variant="h5" fontWeight={600} color="text.primary">
+            Manage Restaurants
+          </Typography>
+          <TextField
+            size="small"
+            placeholder="Search by Restaurant..."
+            variant="outlined"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ width: 250 }}
+          />
+        </Box>
+        {loading && <p>Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead sx={{ backgroundColor: "#f9fafb" }}>
+              <TableRow>
+                <TableCell>
+                  <strong>Image</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Restaurant Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Owner Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Email</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Phone</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Address</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Actions</strong>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((restaurant, index) => (
+                  <TableRow key={`${restaurant.id}-${index}`}>
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      <Avatar
+                        alt={restaurant.name}
+                        src={restaurant.image}
+                        sx={{ bgcolor: "#ef4444", color: "#fff" }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      {restaurant.name}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      {restaurant.ownerName}
+                    </TableCell>{" "}
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      {restaurant.email}
+                    </TableCell>{" "}
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      {restaurant.phone}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "13px" }}>
+                      {restaurant.address}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={restaurant.status}
+                        size="small"
+                        color={
+                          restaurant.status === "open" ? "success" : "error"
+                        }
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box display="flex" gap={1}>
+                        <IconButton
+                          size="small"
+                          sx={{ color: "#2563eb", border: "1px solid #2563eb" }}
+                          onClick={() => handleView(restaurant.id)}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          sx={{ color: "#f59e0b", border: "1px solid #f59e0b" }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          sx={{ color: "red", border: "1px solid red" }}
+                          onClick={() => handleDelete(restaurant.id)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            component="div"
+            count={filteredData.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[]}
+          />
+        </TableContainer>
+      </Box>
+      <div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 500,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            <Typography
+              id="modal-modal-title"
+              fontWeight={600}
+              color="text.primary"
+            >
+              Restaurant Details
+            </Typography>
+
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <strong>Restaurant Name</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.name || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <strong>Owner Name</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.ownerName || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <strong>Email</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.email || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <strong>Phone</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.phone || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <strong>Address</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.address || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <strong>Status</strong>
+                  </TableCell>
+                  <TableCell>{restaurantDetails?.status || "N/A"}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+
+            <Box mt={3} textAlign="right">
+              <button
+                onClick={handleClose}
+                variant="contained"
+                className="bg-red-500 py-1 px-2 text-white"
+              >
+                Close
+              </button>
+            </Box>
+          </Box>
+        </Modal>
       </div>
-      
-      <Table
-        columns={columns}
-        dataSource={restaurantData}
-        pagination={{ pageSize: 5 }}
-        bordered
-      />
-    </div>
+    </>
   );
 };
-// is logo ke hisab se btao ki sidebar ka bg color kya hona chhye  our
+
 export default ManageRestaurants;

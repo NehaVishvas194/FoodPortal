@@ -17,9 +17,10 @@ import { RiCoupon3Line, RiLockPasswordLine } from "react-icons/ri";
 import { FaRegCreditCard } from "react-icons/fa";
 import { IoIosListBox } from "react-icons/io";
 import { TbFileDescription } from "react-icons/tb";
-import { Avatar } from "@mui/material";
+import { Avatar, Menu, MenuItem, IconButton } from "@mui/material";
 import { Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
 import logo_png from "../assets/logo.png";
+const adminName = localStorage.getItem("name");
 
 const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -29,6 +30,22 @@ const MainLayout = () => {
   const getActiveKey = () => {
     const path = location.pathname.replace("/admin/", "");
     return path || "dashboard";
+  };
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    // Clear storage and redirect
+    localStorage.clear();
+    navigate("/");
   };
 
   const signOut = () => {
@@ -110,11 +127,11 @@ const MainLayout = () => {
           ))}
         </nav>
       </div>
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white">
+        <div className="flex justify-between items-center px-5 py-2 bg-white">
           <button onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? (
               <MenuIcon className="text-red-500" />
@@ -122,14 +139,43 @@ const MainLayout = () => {
               <CloseIcon className="text-red-500" />
             )}
           </button>
-          <div className="flex items-center gap-2 text-sm text-red-500 font-medium">
-            <div className="w-10 h-10">
+          <div className="flex items-center gap-1 text-sm text-red-500 font-medium">
+            <IconButton onClick={handleClick}>
               <Avatar
                 src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                sx={{ width: "100%", height: "100%" }}
+                sx={{ width: 30, height: 30 }}
               />
-            </div>
-            <span>Neha Vishvas</span>
+            </IconButton>
+            <span>{adminName}</span>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                My Profile
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Change Password
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  handleLogout();
+                }}
+              >
+                Logout
+              </MenuItem>
+            </Menu>
           </div>
         </div>
 

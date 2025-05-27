@@ -1,7 +1,20 @@
-import React from "react";
-import { Table, Avatar, Tag } from "antd";
-import "./ManageCustomers.css";
-import { Input } from "antd";
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Avatar,
+  TextField,
+  Typography,
+  Chip,
+  Box,
+  TablePagination,
+} from "@mui/material";
+
 const customers = [
   {
     key: "1",
@@ -406,59 +419,111 @@ const customers = [
 ];
 
 const ManageCustomer = () => {
-  const columns = [
-    {
-      title: "Avatar",
-      dataIndex: "name",
-      key: "avatar",
-      render: (text) => <Avatar>{text.charAt(0)}</Avatar>,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <span className="customer-name">{text}</span>,
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Registered On",
-      dataIndex: "date",
-      key: "date",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
-      ),
-    },
-  ];
+  const [page, setPage] = React.useState(0);
+  const rowsPerPage = 5;
+  const [search, setSearch] = useState("");
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const filteredCustomers = customers.filter((customer) =>
+    customer.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="manage-customers-container">
+    <Box p={2}>
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" color="text.primary">
+          Manage Customers
+        </Typography>
 
-     
-      <div style={{display:"flex", justifyContent:"space-between", marginBottom:"10px", direction:"row"}}>
-         <h2 style={{}}>Manage <span >Customers</span></h2>
-        <Input placeholder="Search Customers.." style={{width:"20%"}}/>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={customers}
-        pagination={{ pageSize: 11 }}
-        bordered
-      />
-    </div>
+        <TextField
+          size="small"
+          placeholder="Search by Customer..."
+          variant="outlined"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ width: 250 }}
+        />
+      </Box>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <strong>Image</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Name</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Phone</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Registered On</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Status</strong>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredCustomers
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((customer, index) => (
+                <TableRow key={customer.key}>
+                  <TableCell key={`${customer.key}-${index}`}>
+                    <Avatar
+                      alt={customer.name}
+                      src={customer.imageUrl}
+                      sx={{ bgcolor: "#ef4444", color: "#fff" }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "13px" }}>
+                    {customer.name}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "13px" }}>
+                    {customer.email}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "13px" }}>
+                    {customer.phone}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "13px" }}>
+                    {customer.date}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={customer.status}
+                      color={customer.status === "Active" ? "success" : "error"}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+          component="div"
+          count={filteredCustomers.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]}
+        />
+      </TableContainer>
+    </Box>
   );
 };
 
