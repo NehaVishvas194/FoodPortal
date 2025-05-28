@@ -33,9 +33,19 @@ const ManageRestaurants = () => {
   const rowsPerPage = 5;
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [open2, setOpen2] = React.useState(false);
   const dispatch = useDispatch();
   const { restaurants, loading, error } = useSelector((state) => state.getAll);
   const { restaurantDetails } = useSelector((state) => state.getAll);
+  const [formData, setFormData] = React.useState({
+    id: "",
+    name: "",
+    ownerName: "",
+    email: "",
+    phone: "",
+    address: "",
+    image: null,
+  });
 
   useEffect(() => {
     dispatch(fetchRestaurants());
@@ -72,9 +82,54 @@ const ManageRestaurants = () => {
     setOpen(true);
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleUpdate = (restaurant) => {
+    setFormData({
+      id: restaurant.id,
+      name: restaurant.name,
+      ownerName: restaurant.ownerName,
+      email: restaurant.email,
+      phone: restaurant.phone,
+      address: restaurant.address,
+      image: null, // image will be re-uploaded if changed
+    });
+    setOpen2(true);
+  };
 
+  const handleSubmitUpdate = async () => {
+    const { id, name, ownerName, email, phone, address, image } = formData;
+
+    const form = new FormData();
+    form.append("name", name);
+    form.append("ownerName", ownerName);
+    form.append("email", email);
+    form.append("phone", phone);
+    form.append("address", address);
+    if (image) form.append("image", image);
+
+    try {
+      const response = await fetch(
+        `http://192.168.1.80:5000/api/restaurants/${id}`,
+        {
+          method: "PUT",
+          body: form,
+        }
+      );
+
+      if (response.ok) {
+        Swal.fire("Success", "Restaurant updated successfully", "success");
+        dispatch(fetchRestaurants());
+        setOpen2(false);
+      } else {
+        Swal.fire("Error", "Failed to update restaurant", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  };
+
+  const handleClose = () => setOpen(false);
+  const handleClose2 = () => setOpen2(false);
   return (
     <>
       <Box p={2}>
@@ -178,6 +233,7 @@ const ManageRestaurants = () => {
                         <IconButton
                           size="small"
                           sx={{ color: "#f59e0b", border: "1px solid #f59e0b" }}
+                          onClick={() => handleUpdate(restaurant)}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -204,6 +260,7 @@ const ManageRestaurants = () => {
           />
         </TableContainer>
       </Box>
+      {/* View Modal */}
       <div>
         <Modal
           open={open}
@@ -268,7 +325,20 @@ const ManageRestaurants = () => {
                   <TableCell>
                     <strong>Status</strong>
                   </TableCell>
-                  <TableCell>{restaurantDetails?.status || "N/A"}</TableCell>
+                  <TableCell>
+                    {restaurantDetails && (
+                      <Chip
+                        label={restaurantDetails.status || "N/A"}
+                        size="small"
+                        color={
+                          restaurantDetails.status === "open"
+                            ? "success"
+                            : "error"
+                        }
+                        variant="outlined"
+                      />
+                    )}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -281,6 +351,97 @@ const ManageRestaurants = () => {
               >
                 Close
               </button>
+            </Box>
+          </Box>
+        </Modal>
+      </div>
+
+      {/* Update Modal */}
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          open={open2}
+          onClose={handleClose2}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography
+              id="restaurant-modal-title"
+              variant="h6"
+              component="h2"
+              gutterBottom
+            >
+              Add Restaurant
+            </Typography>
+            <Box
+              component="form"
+              sx={{ "& .MuiTextField-root": { m: 1, width: "100%" } }}
+              noValidate
+              autoComplete="off"
+            >
+              <TextField
+                label="Restaurant Name"
+                id="restaurant-name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Owner Name"
+                id="owner-name"
+                defaultValue="Owner Name"
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Email"
+                id="email"
+                defaultValue="Email"
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Phone"
+                id="phone"
+                defaultValue="Phone"
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Address"
+                id="address"
+                defaultValue="Address"
+                size="small"
+                fullWidth
+              />
+              {/* File input for image upload */}
+              <input
+                type="file"
+                id="image-upload"
+                name="restaurantImage"
+                accept="image/*"
+                style={{ marginTop: "8px" }}
+              />
+            </Box>
+
+            <Box mt={3} textAlign="right">
+              <Button onClick={handleClose2} variant="contained" color="error">
+                Close
+              </Button>
             </Box>
           </Box>
         </Modal>

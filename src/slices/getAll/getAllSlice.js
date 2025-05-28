@@ -20,7 +20,7 @@ export const fetchViewRestaurant = createAsyncThunk(
   async (restoId, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get(`${baseUrl}restaurant/${restoId}`, {
+      const response = await axios.get(`${baseUrl}restaurants/${restoId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,17 +51,32 @@ export const deleteRestaurants = createAsyncThunk(
   }
 );
 
+export const fetchCustomer = createAsyncThunk(
+  "getAll/fetchCustomer",
+  async (_, { getState }) => {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${baseUrl}customers/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+);
+
 const getAllSlice = createSlice({
   name: "getAll",
   initialState: {
     restaurants: [],
     restaurantDetails: null,
+    customers: [],
     loading: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // get all resturant
       .addCase(fetchRestaurants.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -74,18 +89,20 @@ const getAllSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      // view particular restaurant
       .addCase(fetchViewRestaurant.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchViewRestaurant.fulfilled, (state, action) => {
         state.loading = false;
-        state.restaurants = action.payload;
+        state.restaurantDetails = action.payload;
       })
       .addCase(fetchViewRestaurant.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+      // delete restaurant
       .addCase(deleteRestaurants.pending, (state) => {
         state.loading = true;
       })
@@ -98,6 +115,19 @@ const getAllSlice = createSlice({
       .addCase(deleteRestaurants.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // get all resturant
+      .addCase(fetchCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        state.restaurants = action.payload;
+      })
+      .addCase(fetchCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });
